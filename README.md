@@ -1,0 +1,2 @@
+# instant
+Minimalistic screenshot tool.

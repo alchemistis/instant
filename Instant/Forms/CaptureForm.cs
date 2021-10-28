@@ -37,16 +37,27 @@ namespace Instant.Forms
             {
                 mouseDragging = false;
 
-                var img = new Bitmap(selectionArea.Width, selectionArea.Height);
-                using (var g = Graphics.FromImage(img))
+                try
                 {
-                    g.DrawImage(snapshot.Image, -selectionArea.X, -selectionArea.Y);
-                }
+                    var width = selectionArea.Width <= 0 ? 1 : selectionArea.Width;
+                    var height = selectionArea.Height <= 0 ? 1 : selectionArea.Height;
 
-                _ = new Snapshot(img, new List<ITask>()
+                    var img = new Bitmap(width, height);
+                    using (var g = Graphics.FromImage(img))
+                    {
+                        g.DrawImage(snapshot.Image, -selectionArea.X, -selectionArea.Y);
+                    }
+
+                    _ = new Snapshot(img, new List<ITask>()
+                    {
+                        new ClipboardTask()
+                    });
+                }
+                catch (Exception ex)
                 {
-                    new ClipboardTask()
-                });
+                    Close();
+                    MessageBox.Show($"Failed to take snapshot!\n{ex.Message}", "Instant", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
 
                 Close();
             }
@@ -66,6 +77,10 @@ namespace Instant.Forms
             if (mouseDragging)
             {
                 mousePosition = e.Location;
+
+                if (mousePosition.X < selectionArea.Left) mousePosition.X = selectionArea.Left;
+                if (mousePosition.Y < selectionArea.Top) mousePosition.Y = selectionArea.Top;
+
                 snapshotPictureBox.Invalidate();
             }
         }
